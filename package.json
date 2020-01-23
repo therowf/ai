@@ -1,0 +1,36 @@
+{
+  "name": "clear",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow/tfjs-core": "1.4.0",
+    "body-parser": "^1.19.0",
+    "ejs-locals": "^1.0.2",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.1.6",
+    "face-api.js": "^0.22.0",
+    "move-file": "^1.2.0",
+    "multer": "^1.4.2",
+    "tslib": "^1.10.0"
+  },
+  "devDependencies": {
+    "@tensorflow/tfjs-node": "1.4.0",
+    "@types/jasmine": "^3.5.0",
+    "@types/node": "^12.12.17",
+    "canvas": "2.6.0",
+    "rollup": "^1.27.13",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-typescript2": "^0.25.3",
+    "rollup-plugin-uglify": "^6.0.4",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.3"
+  }
+}

@@ -1,0 +1,133 @@
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.css">
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<h5 id="models"></h5>
+<img src="" id="bigboy" style="display: none;" alt="">
+<div style="position: relative;" class="margin">
+  <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
+  <canvas id="flsvid" width="2560" height="1440" style="display: none;"></canvas>
+  <canvas id="overlay"></canvas>
+
+</div>
+<style>
+textarea {
+  overflow-y: scroll;
+  height: 100px;
+  resize: none; /* Remove this if you want the user to resize the textarea */
+}
+</style>
+
+<textarea name="" id="output" cols="30" rows="50"></textarea>
+<div class="margin">
+  <canvas id="showlbl" class="overlay" />
+
+</div>
+<br><br><br><br><br>
+<form>
+    <div class="input-field col s6">
+        <input placeholder="Placeholder" id="name" type="text" class="validate">
+        <label for="first_name">Model Name</label>
+      </div>
+  <div class="file-field input-field">
+    <div class="btn">
+      <span>File</span>
+      <input type="file" accept=".jpg, .png, .jpeg" multiple>
+    </div>
+    <div class="file-path-wrapper">
+      <input id="imgs" class="file-path validate" type="text" placeholder="Upload one or more files">
+    </div>
+  </div>
+</form>
+<button id="model" class="btn">model</button>
+<button id="data" class="btn">Send</button>
+<script>
+  async function onPlay() {
+    const videoEl = $('#inputVideo').get(0)
+
+    if (videoEl.paused || videoEl.ended)
+      return setTimeout(() => onPlay())
+
+
+
+
+    setTimeout(() => onPlay())
+  }
+
+  async function run() {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
+    const videoEl = $('#inputVideo').get(0)
+    videoEl.srcObject = stream
+
+  }
+
+  $(document).ready(function () {
+    run()
+    let img;
+    let imgs;
+    $('input[type="file"]').change(function (e) {
+      imgs = e.target.files;
+    });
+
+    axios.get('/models')
+        .then(function (response) {
+          console.log(response.data);
+          response.data.classes.forEach(element => {
+            $("#models").append("<li>"+element+"</li>")
+          });
+          
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+
+    setInterval(() => {
+      const canv = document.getElementById("flsvid")
+      const ctx = canv.getContext("2d")
+
+      ctx.drawImage($('#inputVideo').get(0), 0, 0, canv.width, canv.height);
+      let frmData = new FormData();
+
+       img = canv.toDataURL("image/jpeg")
+      frmData.append("img", img)
+      axios.post('/r', {
+        img: canv.toDataURL("image/jpeg")
+      })
+        .then(function (response) {
+          console.log(response.data.status.name);
+          $("#output").val($("#output").val()+"<br>"+response.data.status.name.label)
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }, 1000);
+    $("#model").click(_ => {
+      const canv = document.getElementById("flsvid")
+      const ctx = canv.getContext("2d")
+      ctx.drawImage($('#inputVideo').get(0), 0, 0, canv.width, canv.height);
+
+      var frm = new FormData();
+      var arr =  Array.from(imgs)
+      frm.append("model",$("#name").val())
+    arr.map((v,i)=>{
+      frm.append("img"+i, v)
+    })
+      console.log(arr[0])
+      axios.post('/extract', frm
+      ,{
+    headers: {
+        'Content-Type': 'multipart/form-data'
+    }
+  })
+        .then(function (response) {
+          console.log(response);
+          document.getElementById("bigboy").src = response.data.df
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    })
+  })
+</script>
