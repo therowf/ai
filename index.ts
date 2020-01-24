@@ -34,7 +34,9 @@ app.use(express.static(path.join(__dirname, './dist')))
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 var jsonParser = bodyParser.json({ limit: "50mb" });
 app.get("/", (req, res) => {
-  res.render("index");
+  updateResults(QUERY_IMAGE)
+  updateExtraction(QUERY_IMAGE)
+  res.render("process");
 })
 
 var person = { time: Date.now(), name: {} }
