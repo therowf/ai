@@ -1,3 +1,4 @@
+require('dotenv').config()
 import * as faceapi from 'face-api.js';
 let classes = ["rakib", "amy", "leonard"]
 import { canvas, faceDetectionNet, faceDetectionOptions, saveFile } from './commons';
@@ -248,5 +249,5 @@ console.log(faceImages)
 
 
 
-app.listen(5000, err => console.log("app is listening 3000"));
+app.listen(process.env.PORT || 5000), err => console.log("app is listening 5000");
 

@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+require('dotenv').config();
 var faceapi = require("face-api.js");
 var classes = ["rakib", "amy", "leonard"];
 var commons_1 = require("./commons");
@@ -70,7 +71,9 @@ app.use(express.static(path.join(__dirname, './dist')));
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 var jsonParser = bodyParser.json({ limit: "50mb" });
 app.get("/", function (req, res) {
-    res.render("index");
+    updateResults(QUERY_IMAGE);
+    updateExtraction(QUERY_IMAGE);
+    res.render("process");
 });
 var person = { time: Date.now(), name: {} };
 app.get("/s", function (req, res) {
@@ -330,4 +333,4 @@ function updateExtraction(img) {
 //     }
 //   })
 // }
-app.listen(5000, function (err) { return console.log("app is listening 3000"); });
+app.listen(process.env.PORT || 5000), function (err) { return console.log("app is listening 5000"); };
