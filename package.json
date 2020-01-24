@@ -20,9 +20,7 @@
     "move-file": "^1.2.0",
     "multer": "^1.4.2",
     "tslib": "^1.10.0",
-     "canvas":"2.50"
+    "canvas": "1.6.5"
   },
-  "devDependencies": {
-   
-  }
+  "devDependencies": {}
 }
