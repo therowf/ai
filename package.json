@@ -19,6 +19,7 @@
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
     "face-api.js": "^0.22.0",
+    "mongoose": "^5.8.11",
     "move-file": "^1.2.0",
     "multer": "^1.4.2",
     "tslib": "^1.10.0"

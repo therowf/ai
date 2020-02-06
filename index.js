@@ -52,6 +52,8 @@ var app = express();
 var moveFile = require('move-file');
 var bodyParser = require('body-parser');
 var faceMatcher = null;
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://therowf:Abc9980@ds061681.mlab.com:61681/rakibnaiot', { useNewUrlParser: true });
 var engine = require('ejs-locals');
 app.engine('ejs', engine);
 app.set('view engine', 'ejs');
@@ -70,9 +72,24 @@ app.use(express.static(path.join(__dirname, './weights')));
 app.use(express.static(path.join(__dirname, './dist')));
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 var jsonParser = bodyParser.json({ limit: "50mb" });
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+    console.log("we are connected");
+});
+var logSchema = new mongoose.Schema({
+    time: Date
+});
+var Now = mongoose.model('logSchema', logSchema);
 app.get("/", function (req, res) {
     updateResults(QUERY_IMAGE);
     updateExtraction(QUERY_IMAGE);
+    var silence = new Now({ time: new Date() });
+    silence.save(function (err, silence) {
+        if (err)
+            return console.error(err);
+        console.log(silence.time); // 'Silence'
+    });
     res.render("process");
 });
 var person = { time: Date.now(), name: {} };
