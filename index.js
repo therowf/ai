@@ -84,12 +84,6 @@ var Now = mongoose.model('logSchema', logSchema);
 app.get("/", function (req, res) {
     updateResults(QUERY_IMAGE);
     updateExtraction(QUERY_IMAGE);
-    var silence = new Now({ time: new Date() });
-    silence.save(function (err, silence) {
-        if (err)
-            return console.error(err);
-        console.log(silence.time); // 'Silence'
-    });
     res.render("process");
 });
 var person = { time: Date.now(), name: {} };
@@ -117,6 +111,15 @@ app.get("/models", function (req, res) {
         });
     });
     run2();
+});
+app.get("/n", function (req, res) {
+    var silence = new Now({ time: new Date() });
+    silence.save(function (err, silence) {
+        if (err)
+            return console.error(err);
+        console.log(silence.time); // 'Silence'
+    });
+    res.render("100 ko");
 });
 app.post("/extract", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var tmpPath, model, dir, newPath, i, _a, _b, _i, file, bitw, base64;
