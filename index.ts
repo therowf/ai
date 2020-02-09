@@ -108,7 +108,7 @@ silence.save(function (err, silence) {
   if (err) return console.error(err);
   console.log(silence.time); // 'Silence'
 });
-res.send({status:"100 ko"})
+res.send("100 ko")
 })
 app.post("/extract", async(req, res) => {
  
