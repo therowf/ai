@@ -119,7 +119,7 @@ app.get("/n", function (req, res) {
             return console.error(err);
         console.log(silence.time); // 'Silence'
     });
-    res.render("100 ko");
+    res.send("100 ko");
 });
 app.post("/extract", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var tmpPath, model, dir, newPath, i, _a, _b, _i, file, bitw, base64;
