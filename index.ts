@@ -60,13 +60,7 @@ app.get("/", (req, res) => {
   updateResults(QUERY_IMAGE)
   updateExtraction(QUERY_IMAGE)
   
-var silence = new Now({ time: new Date() });
 
-
-silence.save(function (err, silence) {
-  if (err) return console.error(err);
-  console.log(silence.time); // 'Silence'
-});
 res.render("process");
 })
 
@@ -106,7 +100,16 @@ run2()
 
 })
 
+app.get("/n", (req,res)=>{
+  var silence = new Now({ time: new Date() });
 
+
+silence.save(function (err, silence) {
+  if (err) return console.error(err);
+  console.log(silence.time); // 'Silence'
+});
+res.send({status:"100 ko"})
+})
 app.post("/extract", async(req, res) => {
  
 
