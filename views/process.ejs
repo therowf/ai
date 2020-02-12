@@ -5,21 +5,30 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <h5 id="models"></h5>
 <img src="" id="bigboy" style="display: none;" alt="">
+
+<style>
+.grid{
+  display: grid;
+  column-gap: 50px;
+  grid-template-columns: auto auto;
+}
+#output {
+    padding: 0px 0px 0px 50px;
+    height: 500px;
+    overflow: scroll;
+}
+</style>
+
+<div class="grid">
+<div name="" id="output" cols="30" rows="50"></div>
 <div style="position: relative;" class="margin">
   <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
   <canvas id="flsvid" width="2560" height="1440" style="display: none;"></canvas>
   <canvas id="overlay"></canvas>
 
 </div>
-<style>
-textarea {
-  overflow-y: scroll;
-  height: 100px;
-  resize: none; /* Remove this if you want the user to resize the textarea */
-}
-</style>
 
-<textarea name="" id="output" cols="30" rows="50"></textarea>
+</div>
 <div class="margin">
   <canvas id="showlbl" class="overlay" />
 
@@ -27,7 +36,7 @@ textarea {
 <br><br><br><br><br>
 <form>
     <div class="input-field col s6">
-        <input placeholder="Placeholder" id="name" type="text" class="validate">
+        <input placeholder="Placeholder" id="name" type="text" class="validate" required>
         <label for="first_name">Model Name</label>
       </div>
   <div class="file-field input-field">
@@ -36,12 +45,12 @@ textarea {
       <input type="file" accept=".jpg, .png, .jpeg" multiple>
     </div>
     <div class="file-path-wrapper">
-      <input id="imgs" class="file-path validate" type="text" placeholder="Upload one or more files">
+      <input id="imgs" class="file-path validate" type="text" placeholder="Upload at least 5 files" required>
     </div>
   </div>
 </form>
 <button id="model" class="btn">model</button>
-<button id="data" class="btn">Send</button>
+<!-- <button id="data" class="btn">Send</button> -->
 <script>
   async function onPlay() {
     const videoEl = $('#inputVideo').get(0)
@@ -97,7 +106,9 @@ textarea {
       })
         .then(function (response) {
           console.log(response.data.status.name);
-          $("#output").val($("#output").val()+"<br>"+response.data.status.name.label)
+          $("#output").html($("#output").html()+"<br/>"+new Date()+ " > <br/><b style='color:red;'>"+response.data.status.name.label+"<b>")
+          var objDiv = document.getElementById("output");
+objDiv.scrollTop = objDiv.scrollHeight;
         })
         .catch(function (error) {
           console.log(error);

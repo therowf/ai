@@ -1,6 +1,6 @@
 require('dotenv').config()
 import * as faceapi from 'face-api.js';
-let classes = ["rakib", "amy", "leonard"]
+let classes = ["amy", "leonard"]
 import { canvas, faceDetectionNet, faceDetectionOptions, saveFile } from './commons';
 import { func } from '@tensorflow/tfjs-data';
 //import {createBbtFaceMatcher} from "./controllers/bbt"
