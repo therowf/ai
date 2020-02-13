@@ -107,7 +107,7 @@
         .then(function (response) {
           console.log(response.data);
           response.data.status.forEach(v=>{
-            if(!v.label=="unknown")
+           // if(!v.label=="unknown")
             $("#output").html($("#output").html()+"<br/>"+new Date()+ " > <br/><b style='color:red;'>"+v.label+"<b>")
           })
           
