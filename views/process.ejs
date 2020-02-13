@@ -107,6 +107,7 @@
         .then(function (response) {
           console.log(response.data);
           response.data.status.forEach(v=>{
+            if(!v.label=="unknown")
             $("#output").html($("#output").html()+"<br/>"+new Date()+ " > <br/><b style='color:red;'>"+v.label+"<b>")
           })
           
@@ -116,7 +117,7 @@ objDiv.scrollTop = objDiv.scrollHeight;
         .catch(function (error) {
           console.log(error);
         });
-    }, 3000);
+    }, 1000);
     $("#model").click(_ => {
       const canv = document.getElementById("flsvid")
       const ctx = canv.getContext("2d")
