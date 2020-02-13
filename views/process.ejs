@@ -1,8 +1,8 @@
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.css">
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<link rel="stylesheet" href="js/mat.css">
+<script type="text/javascript" src="js/jquery.js"></script>
+<script src="js/mat.js"></script>
+<script src="js/axios.js"></script>
 <h5 id="models"></h5>
 <img src="" id="bigboy" style="display: none;" alt="">
 
@@ -105,15 +105,18 @@
         img: canv.toDataURL("image/jpeg")
       })
         .then(function (response) {
-          console.log(response.data.status.name);
-          $("#output").html($("#output").html()+"<br/>"+new Date()+ " > <br/><b style='color:red;'>"+response.data.status.name.label+"<b>")
+          console.log(response.data);
+          response.data.status.forEach(v=>{
+            $("#output").html($("#output").html()+"<br/>"+new Date()+ " > <br/><b style='color:red;'>"+v.label+"<b>")
+          })
+          
           var objDiv = document.getElementById("output");
 objDiv.scrollTop = objDiv.scrollHeight;
         })
         .catch(function (error) {
           console.log(error);
         });
-    }, 1000);
+    }, 3000);
     $("#model").click(_ => {
       const canv = document.getElementById("flsvid")
       const ctx = canv.getContext("2d")
@@ -122,23 +125,30 @@ objDiv.scrollTop = objDiv.scrollHeight;
       var frm = new FormData();
       var arr =  Array.from(imgs)
       frm.append("model",$("#name").val())
-    arr.map((v,i)=>{
+    arr.map((v,i, x)=>{
       frm.append("img"+i, v)
-    })
-      console.log(arr[0])
-      axios.post('/extract', frm
+
+      if(x.length===i+1){
+       // alert("now sending")
+        axios.post('/extract', frm
       ,{
     headers: {
         'Content-Type': 'multipart/form-data'
     }
   })
         .then(function (response) {
-          console.log(response);
-          document.getElementById("bigboy").src = response.data.df
+         // console.log(response);
+          alert("saved")
+          window.location.reload()
+        //  document.getElementById("bigboy").src = response.data.df
         })
         .catch(function (error) {
           console.log(error);
         });
+      }
+    })
+     
+      
     })
   })
 </script>

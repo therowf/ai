@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 require('dotenv').config();
 var faceapi = require("face-api.js");
-var classes = ["rakib", "amy", "leonard"];
+var classes = ["amy", "therowf", "leonard", "penny", "raj", "bernadette"];
 var commons_1 = require("./commons");
 //import {createBbtFaceMatcher} from "./controllers/bbt"
 var final = [];
@@ -76,40 +76,31 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
     console.log("we are connected");
+    run2();
 });
 var logSchema = new mongoose.Schema({
     time: Date
 });
 var Now = mongoose.model('logSchema', logSchema);
 app.get("/", function (req, res) {
+    run2();
     updateResults(QUERY_IMAGE);
-    updateExtraction(QUERY_IMAGE);
+    // updateExtraction(QUERY_IMAGE, "null", 0)
     res.render("process");
 });
 var person = { time: Date.now(), name: {} };
 app.get("/s", function (req, res) {
     updateResults(QUERY_IMAGE);
-    updateExtraction(QUERY_IMAGE);
+    // updateExtraction(QUERY_IMAGE, "null", 0)
     res.render("process");
 });
 app.post("/r", jsonParser, function (req, res) {
+    //
     updateResults(req.body.img);
-    res.json({ status: person });
+    res.json({ status: person.name });
 });
 app.get("/models", function (req, res) {
-    classes = [];
-    fs.readdir("./images", { withFileTypes: true }, function (err, files) {
-        if (err)
-            console.log(err);
-        files
-            .filter(function (d) { return d.isDirectory(); })
-            .map(function (m, i, c) {
-            classes.push(m.name);
-            if (i + 1 === c.length) {
-                res.send({ classes: classes });
-            }
-        });
-    });
+    res.send({ classes: classes });
     run2();
 });
 app.get("/n", function (req, res) {
@@ -122,7 +113,7 @@ app.get("/n", function (req, res) {
     res.send("100 ko");
 });
 app.post("/extract", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var tmpPath, model, dir, newPath, i, _a, _b, _i, file, bitw, base64;
+    var tmpPath, model, dir, newPath, i, _a, _b, _i, file, obj;
     return __generator(this, function (_c) {
         switch (_c.label) {
             case 0:
@@ -133,30 +124,26 @@ app.post("/extract", function (req, res) { return __awaiter(void 0, void 0, void
                 _i = 0;
                 _c.label = 1;
             case 1:
-                if (!(_i < _a.length)) return [3 /*break*/, 6];
+                if (!(_i < _a.length)) return [3 /*break*/, 4];
                 file = _a[_i];
-                if (!(i < 5)) return [3 /*break*/, 4];
+                // skip loop if the property is from prototype
+                if (!req.files.hasOwnProperty(file))
+                    return [3 /*break*/, 3];
                 i++;
-                tmpPath = req.files[file].tempFilePath;
+                return [4 /*yield*/, file];
+            case 2:
+                obj = _c.sent();
+                tmpPath = req.files[obj].tempFilePath;
                 model = req.body.model;
                 dir = "./images/" + model;
                 newPath = "./images/" + model + "/" + model + i + ".png";
-                return [4 /*yield*/, moveFile(tmpPath, newPath)];
-            case 2:
-                _c.sent();
-                return [4 /*yield*/, updateExtraction(newPath)];
+                moveFile(tmpPath, newPath);
+                updateExtraction(newPath, model, i);
+                _c.label = 3;
             case 3:
-                bitw = _c.sent();
-                base64 = bitw;
-                commons_1.saveFile("./images/" + model + "/" + model + i + ".png", Buffer.from(base64.replace(/^data:image\/png;base64,/, ""), 'base64'));
-                return [3 /*break*/, 5];
-            case 4:
-                null;
-                _c.label = 5;
-            case 5:
                 _i++;
                 return [3 /*break*/, 1];
-            case 6:
+            case 4:
                 res.send("ok");
                 return [2 /*return*/];
         }
@@ -215,17 +202,19 @@ function updateResults(img) {
             switch (_a.label) {
                 case 0:
                     if (!faceDetectionControls_1.isFaceDetectionModelLoaded) {
-                        console.log(9999);
+                        console.log("-------");
                     }
                     return [4 /*yield*/, commons_1.canvas.loadImage(img)];
                 case 1:
                     inputImgEl = _a.sent();
-                    options = faceDetectionControls_1.getFaceDetectorOptions;
+                    return [4 /*yield*/, faceDetectionControls_1.getFaceDetectorOptions];
+                case 2:
+                    options = _a.sent();
                     return [4 /*yield*/, faceapi
                             .detectAllFaces(inputImgEl, options)
                             .withFaceLandmarks()
                             .withFaceDescriptors()];
-                case 2:
+                case 3:
                     results = _a.sent();
                     drawFaceRecognitionResults(results, img);
                     return [2 /*return*/];
@@ -235,7 +224,8 @@ function updateResults(img) {
 }
 function drawFaceRecognitionResults(results, img) {
     return __awaiter(this, void 0, void 0, function () {
-        var inputImgEl, resizedResults;
+        var inputImgEl, resizedResults, totRes, ind;
+        var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, commons_1.canvas.loadImage(img)
@@ -245,15 +235,33 @@ function drawFaceRecognitionResults(results, img) {
                 ];
                 case 1:
                     inputImgEl = _a.sent();
-                    resizedResults = faceapi.resizeResults(results, inputImgEl);
+                    return [4 /*yield*/, faceapi.resizeResults(results, inputImgEl)];
+                case 2:
+                    resizedResults = _a.sent();
+                    totRes = [];
+                    ind = 0;
                     resizedResults.forEach(function (_a) {
                         var detection = _a.detection, descriptor = _a.descriptor;
-                        var label = faceMatcher.findBestMatch(descriptor).toString();
-                        var options = { label: label };
-                        person.name = options;
-                        console.log(options);
-                        // const drawBox = new faceapi.draw.DrawBox(detection.box, options)
-                        // drawBox.draw(canvas)
+                        return __awaiter(_this, void 0, void 0, function () {
+                            var discript, label, options;
+                            return __generator(this, function (_b) {
+                                switch (_b.label) {
+                                    case 0: return [4 /*yield*/, descriptor];
+                                    case 1:
+                                        discript = _b.sent();
+                                        return [4 /*yield*/, faceMatcher.findBestMatch(discript).toString()];
+                                    case 2:
+                                        label = _b.sent();
+                                        options = { label: label };
+                                        totRes.push(options);
+                                        if (resizedResults.length === ind + 1) {
+                                            person.name = totRes;
+                                        }
+                                        ind++;
+                                        return [2 /*return*/];
+                                }
+                            });
+                        });
                     });
                     return [2 /*return*/];
             }
@@ -264,10 +272,22 @@ function run2() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: 
-                // load face detection, face landmark model and face recognition models
-                // await fdc.changeFaceDetector()
-                return [4 /*yield*/, commons_1.faceDetectionNet.loadFromDisk('./weights')];
+                case 0:
+                    classes = [];
+                    fs.readdir("./images", { withFileTypes: true }, function (err, files) {
+                        if (err)
+                            console.log(err);
+                        files
+                            .filter(function (d) { return d.isDirectory(); })
+                            .map(function (m, i, c) {
+                            classes.push(m.name);
+                            if (i + 1 === c.length) {
+                            }
+                        });
+                    });
+                    // load face detection, face landmark model and face recognition models
+                    // await fdc.changeFaceDetector()
+                    return [4 /*yield*/, commons_1.faceDetectionNet.loadFromDisk('./weights')];
                 case 1:
                     // load face detection, face landmark model and face recognition models
                     // await fdc.changeFaceDetector()
@@ -291,7 +311,6 @@ function run2() {
                     faceMatcher = _a.sent();
                     // start processing image
                     updateResults(REFERENCE_IMAGE);
-                    updateExtraction(REFERENCE_IMAGE);
                     return [2 /*return*/];
             }
         });
@@ -309,9 +328,9 @@ var grayscale = function (canvas) {
     }
     ctx.putImageData(imageData, 0, 0);
 };
-function updateExtraction(img) {
+function updateExtraction(img, model, i) {
     return __awaiter(this, void 0, void 0, function () {
-        var inputImgEl, options, detections, faceImages;
+        var inputImgEl, options, detections, faceImages, base64;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -330,7 +349,8 @@ function updateExtraction(img) {
                     faceImages = _a.sent();
                     if (faceImages[0]) {
                         grayscale(faceImages[0]);
-                        return [2 /*return*/, faceImages[0].toDataURL("image/png")];
+                        base64 = faceImages[0].toDataURL("image/png");
+                        commons_1.saveFile("./images/" + model + "/" + model + i + ".png", Buffer.from(base64.replace(/^data:image\/png;base64,/, ""), 'base64'));
                     }
                     console.log(faceImages);
                     return [2 /*return*/];

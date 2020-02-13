@@ -1,6 +1,6 @@
 require('dotenv').config()
 import * as faceapi from 'face-api.js';
-let classes = ["amy", "leonard"]
+let classes = ["amy", "therowf", "leonard", "penny", "raj", "bernadette"]
 import { canvas, faceDetectionNet, faceDetectionOptions, saveFile } from './commons';
 import { func } from '@tensorflow/tfjs-data';
 //import {createBbtFaceMatcher} from "./controllers/bbt"
@@ -43,6 +43,7 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   console.log("we are connected")
+  run2()
 });
 
 
@@ -57,8 +58,9 @@ var Now = mongoose.model('logSchema', logSchema);
 
 
 app.get("/", (req, res) => {
+  run2()
   updateResults(QUERY_IMAGE)
-  updateExtraction(QUERY_IMAGE)
+ // updateExtraction(QUERY_IMAGE, "null", 0)
   
 
 res.render("process");
@@ -70,33 +72,22 @@ app.get("/s", (req, res) => {
 
 
   updateResults(QUERY_IMAGE)
-  updateExtraction(QUERY_IMAGE)
+ // updateExtraction(QUERY_IMAGE, "null", 0)
   res.render("process");
 
 })
 
 
 app.post("/r", jsonParser, (req, res) => {
-
+//
   updateResults(req.body.img)
-
-  res.json({ status: person })
+  res.json({ status: person.name })
 })
 
 app.get("/models", (req,res)=>{
-  classes= []
-  fs.readdir("./images", { withFileTypes: true }, (err, files) => {
-    if (err) console.log(err)
-    files
-      .filter(d => d.isDirectory())
-      .map((m, i, c) =>{
-         classes.push(m.name)
-        if(i+1===c.length){
-          res.send({classes})
-        }
-        })
-  })
-run2()
+  res.send({classes})
+          run2()
+  
 
 })
 
@@ -111,30 +102,40 @@ silence.save(function (err, silence) {
 res.send("100 ko")
 })
 app.post("/extract", async(req, res) => {
- 
 
-let tmpPath, model, dir, newPath, i=0;
+   let tmpPath, model, dir, newPath, i=0;
+ //console.log(req.files)
+    
  
-    for (let file in req.files){
-      if(i<5){
-      i++;
-       tmpPath = req.files[file].tempFilePath;
+ for (var file in req.files) {
+  // skip loop if the property is from prototype
+  if (!req.files.hasOwnProperty(file)) continue;
+i++;
+  var obj =  await file;
+  
+
+       tmpPath = req.files[obj].tempFilePath;
+      
        model = req.body.model
        dir = "./images/"+model
        newPath = "./images/"+model+"/"+model+i + ".png";
 
-      await moveFile(tmpPath, newPath);
-      let bitw = await updateExtraction(newPath)
+       moveFile(tmpPath, newPath);
+     updateExtraction(newPath, model, i)
   
-    var base64 = bitw;
-    saveFile("./images/"+model+"/"+model+i + ".png", Buffer.from(base64.replace(/^data:image\/png;base64,/, ""), 'base64'))
-  }else{
-    null
-  }
-    }
+ 
+      
+ }
+
+
+   
+
+
     
 
-      res.send("ok")
+
+
+     res.send("ok")
  
 
 })
@@ -172,17 +173,17 @@ async function createBbtFaceMatcher(numImagesForTraining = 5) {
 
 async function updateResults(img) {
   if (!isFaceDetectionModelLoaded) {
-    console.log(9999)
+    console.log("-------")
   }
 
   const inputImgEl = await canvas.loadImage(img)
 
-  const options = getFaceDetectorOptions
+  const options = await getFaceDetectorOptions
   const results = await faceapi
     .detectAllFaces(inputImgEl, options)
     .withFaceLandmarks()
     .withFaceDescriptors()
-  drawFaceRecognitionResults(results, img)
+drawFaceRecognitionResults(results, img)
 }
 
 
@@ -194,13 +195,20 @@ async function drawFaceRecognitionResults(results, img) {
   //faceapi.matchDimensions(canvas, inputImgEl)
   // resize detection and landmarks in case displayed image is smaller than
   // original size
-  const resizedResults = faceapi.resizeResults(results, inputImgEl)
-
-  resizedResults.forEach(({ detection, descriptor }) => {
-    const label = faceMatcher.findBestMatch(descriptor).toString()
+  const resizedResults = await faceapi.resizeResults(results, inputImgEl)
+  let totRes = []
+  let ind = 0;
+  resizedResults.forEach(async({ detection, descriptor }) => {
+   
+    let discript = await descriptor;
+    const label = await faceMatcher.findBestMatch(discript).toString()
     const options = { label }
-    person.name = options;
-    console.log(options)
+   totRes.push(options)
+   if(resizedResults.length===ind+1){
+    person.name = totRes;
+   }
+   ind++;
+    
     // const drawBox = new faceapi.draw.DrawBox(detection.box, options)
     // drawBox.draw(canvas)
   })
@@ -208,6 +216,19 @@ async function drawFaceRecognitionResults(results, img) {
 
 
 async function run2() {
+  classes= []
+  fs.readdir("./images", { withFileTypes: true }, (err, files) => {
+    if (err) console.log(err)
+    files
+      .filter(d => d.isDirectory())
+      .map((m, i, c) =>{
+         classes.push(m.name)
+        if(i+1===c.length){
+          
+        }
+        })
+  })
+
   // load face detection, face landmark model and face recognition models
   // await fdc.changeFaceDetector()
   await faceDetectionNet.loadFromDisk('./weights');
@@ -220,7 +241,7 @@ async function run2() {
   // start processing image
   updateResults(REFERENCE_IMAGE)
 
-  updateExtraction(REFERENCE_IMAGE)
+ // updateExtraction(REFERENCE_IMAGE, "null", 0)
 }
 
 var grayscale = function (canvas) {
@@ -238,7 +259,7 @@ var grayscale = function (canvas) {
 
 
 
-async function updateExtraction(img) {
+async function updateExtraction(img, model, i) {
   if (!isFaceDetectionModelLoaded) {
     console.log(777)
   }
@@ -250,7 +271,11 @@ async function updateExtraction(img) {
   const faceImages = await faceapi.extractFaces(inputImgEl, detections)
 if(faceImages[0]){
   grayscale(faceImages[0])
-   return faceImages[0].toDataURL("image/png");
+    
+
+       var base64 = faceImages[0].toDataURL("image/png");
+ saveFile("./images/"+model+"/"+model+i + ".png", Buffer.from(base64.replace(/^data:image\/png;base64,/, ""), 'base64'))
+
 }
 
 console.log(faceImages)
