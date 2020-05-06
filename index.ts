@@ -10,6 +10,7 @@ const REFERENCE_IMAGE = './images/bbt6.jpg';
 const QUERY_IMAGE = './images/bbt3.jpg';
 import { getFaceDetectorOptions, isFaceDetectionModelLoaded, getCurrentFaceDetectionNet } from "./controllers/faceDetectionControls";
 import { Dirent } from 'fs';
+import { op } from '@tensorflow/tfjs';
 const express = require("express");
 const fs = require("fs")
 const app = express();
@@ -31,10 +32,6 @@ app.use(fileUpload({
   tempFileDir: 'uploads/'
 }));
 app.use(express.static(path.join(__dirname, './public')))
-app.use(express.static(path.join(__dirname, './images')))
-app.use(express.static(path.join(__dirname, './media')))
-app.use(express.static(path.join(__dirname, './weights')))
-app.use(express.static(path.join(__dirname, './dist')))
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 var jsonParser = bodyParser.json({ limit: "50mb" });
 
@@ -61,8 +58,11 @@ app.get("/", (req, res) => {
   run2()
   updateResults(QUERY_IMAGE)
  // updateExtraction(QUERY_IMAGE, "null", 0)
-  
+res.render("index");
+})
 
+
+app.get("/see", (req, res) => {
 res.render("process");
 })
 
@@ -100,10 +100,14 @@ silence.save(function (err, silence) {
   console.log(silence.time); // 'Silence'
 });
 res.send("100 ko")
-})
+});
 app.post("/extract", async(req, res) => {
 
-   let tmpPath, model, dir, newPath, i=0;
+   let tmpPath;
+   let model;
+    let dir;
+    let newPath;
+    let i=0;
  //console.log(req.files)
     
  
@@ -182,7 +186,9 @@ async function updateResults(img) {
   const results = await faceapi
     .detectAllFaces(inputImgEl, options)
     .withFaceLandmarks()
+    .withAgeAndGender()
     .withFaceDescriptors()
+    .withFaceExpressions()
 drawFaceRecognitionResults(results, img)
 }
 
@@ -191,18 +197,27 @@ async function drawFaceRecognitionResults(results, img) {
   // const canvas = $('#showlbl').get(0)
   // const inputImgEl = $('#inputImg').get(0)
   const inputImgEl = await canvas.loadImage(img)
+  results.forEach(element => {
+   console.log("gender :", element.gender)
+   console.log("age :", element.age)
+   console.log("express :", element.expressions)
 
+
+  });
   //faceapi.matchDimensions(canvas, inputImgEl)
   // resize detection and landmarks in case displayed image is smaller than
   // original size
   const resizedResults = await faceapi.resizeResults(results, inputImgEl)
   let totRes = []
   let ind = 0;
+  console.log(resizedResults.length, " persons been detected")
   resizedResults.forEach(async({ detection, descriptor }) => {
-   
+
     let discript = await descriptor;
+
     const label = await faceMatcher.findBestMatch(discript).toString()
     const options = { label }
+
    totRes.push(options)
    if(resizedResults.length===ind+1){
     person.name = totRes;
@@ -235,6 +250,8 @@ async function run2() {
   await faceapi.nets.faceLandmark68Net.loadFromDisk('./weights');
   await faceapi.nets.faceRecognitionNet.loadFromDisk('./weights');
   await getCurrentFaceDetectionNet.loadFromDisk('./weights')
+  await faceapi.nets.ageGenderNet.loadFromDisk('./weights')
+  await faceapi.nets.faceExpressionNet.loadFromDisk('./weights')
   // initialize face matcher with 1 reference descriptor per bbt character
   faceMatcher = await createBbtFaceMatcher(1)
 

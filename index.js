@@ -66,10 +66,6 @@ app.use(fileUpload({
     tempFileDir: 'uploads/'
 }));
 app.use(express.static(path.join(__dirname, './public')));
-app.use(express.static(path.join(__dirname, './images')));
-app.use(express.static(path.join(__dirname, './media')));
-app.use(express.static(path.join(__dirname, './weights')));
-app.use(express.static(path.join(__dirname, './dist')));
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 var jsonParser = bodyParser.json({ limit: "50mb" });
 var db = mongoose.connection;
@@ -86,6 +82,9 @@ app.get("/", function (req, res) {
     run2();
     updateResults(QUERY_IMAGE);
     // updateExtraction(QUERY_IMAGE, "null", 0)
+    res.render("index");
+});
+app.get("/see", function (req, res) {
     res.render("process");
 });
 var person = { time: Date.now(), name: {} };
@@ -213,7 +212,9 @@ function updateResults(img) {
                     return [4 /*yield*/, faceapi
                             .detectAllFaces(inputImgEl, options)
                             .withFaceLandmarks()
-                            .withFaceDescriptors()];
+                            .withAgeAndGender()
+                            .withFaceDescriptors()
+                            .withFaceExpressions()];
                 case 3:
                     results = _a.sent();
                     drawFaceRecognitionResults(results, img);
@@ -228,18 +229,20 @@ function drawFaceRecognitionResults(results, img) {
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, commons_1.canvas.loadImage(img)
-                    //faceapi.matchDimensions(canvas, inputImgEl)
-                    // resize detection and landmarks in case displayed image is smaller than
-                    // original size
-                ];
+                case 0: return [4 /*yield*/, commons_1.canvas.loadImage(img)];
                 case 1:
                     inputImgEl = _a.sent();
+                    results.forEach(function (element) {
+                        console.log("gender :", element.gender);
+                        console.log("age :", element.age);
+                        console.log("express :", element.expressions);
+                    });
                     return [4 /*yield*/, faceapi.resizeResults(results, inputImgEl)];
                 case 2:
                     resizedResults = _a.sent();
                     totRes = [];
                     ind = 0;
+                    console.log(resizedResults.length, " persons been detected");
                     resizedResults.forEach(function (_a) {
                         var detection = _a.detection, descriptor = _a.descriptor;
                         return __awaiter(_this, void 0, void 0, function () {
@@ -298,15 +301,21 @@ function run2() {
                     return [4 /*yield*/, faceapi.nets.faceRecognitionNet.loadFromDisk('./weights')];
                 case 3:
                     _a.sent();
-                    return [4 /*yield*/, faceDetectionControls_1.getCurrentFaceDetectionNet.loadFromDisk('./weights')
+                    return [4 /*yield*/, faceDetectionControls_1.getCurrentFaceDetectionNet.loadFromDisk('./weights')];
+                case 4:
+                    _a.sent();
+                    return [4 /*yield*/, faceapi.nets.ageGenderNet.loadFromDisk('./weights')];
+                case 5:
+                    _a.sent();
+                    return [4 /*yield*/, faceapi.nets.faceExpressionNet.loadFromDisk('./weights')
                         // initialize face matcher with 1 reference descriptor per bbt character
                     ];
-                case 4:
+                case 6:
                     _a.sent();
                     return [4 /*yield*/, createBbtFaceMatcher(1)
                         // start processing image
                     ];
-                case 5:
+                case 7:
                     // initialize face matcher with 1 reference descriptor per bbt character
                     faceMatcher = _a.sent();
                     // start processing image
