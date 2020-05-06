@@ -255,9 +255,9 @@ setInterval(() => {
         img: canv.toDataURL("image/jpeg")
       })
       .then(function (response) {
-        $("#demo .des").html("")
-        $("#demo .des2").html("")
+        
           response.data.status.result.forEach(v=>{
+            
               var path = window.location.href;
               if(path.split("#").pop()=="demo"){
                 if(v.gender=="male"){
@@ -269,6 +269,8 @@ setInterval(() => {
                 }
               }
               if(v.gender=="female"){
+                $("#demo .des").html("")
+        $("#demo .des2").html("")
                 $("#demo .des").prepend(
             `
             <h5 style="color:yellow;">
@@ -278,6 +280,8 @@ setInterval(() => {
               }
             
               if(v.gender=="male"){
+                $("#demo .des").html("")
+        $("#demo .des2").html("")
                 $("#demo .des").prepend(
             `
             <h5 style="color:blue;">
@@ -334,7 +338,7 @@ setInterval(() => {
           console.log(error);
       });
         
-        }, 1000)
+        }, 5000)
 
       })
 </script>
