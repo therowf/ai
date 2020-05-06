@@ -84,70 +84,95 @@ app.get("/", function (req, res) {
     // updateExtraction(QUERY_IMAGE, "null", 0)
     res.render("index");
 });
-app.get("/see", function (req, res) {
-    res.render("process");
-});
 var person = { time: Date.now(), name: {} };
-app.get("/s", function (req, res) {
-    updateResults(QUERY_IMAGE);
-    // updateExtraction(QUERY_IMAGE, "null", 0)
-    res.render("process");
+var frontEnd = { result: [] };
+/*
+
+app.get("/see", (req, res) => {
+res.render("process");
+})
+
+
+
+app.get("/s", (req, res) => {
+
+
+  updateResults(QUERY_IMAGE)
+ // updateExtraction(QUERY_IMAGE, "null", 0)
+  res.render("process");
+
+})
+
+
+
+
+app.get("/models", (req,res)=>{
+  res.send({classes})
+          run2()
+  
+
+})
+
+app.get("/n", (req,res)=>{
+  var silence = new Now({ time: new Date() });
+
+
+silence.save(function (err, silence) {
+  if (err) return console.error(err);
+  console.log(silence.time); // 'Silence'
 });
+res.send("100 ko")
+});
+app.post("/extract", async(req, res) => {
+
+   let tmpPath;
+   let model;
+    let dir;
+    let newPath;
+    let i=0;
+ //console.log(req.files)
+    
+ 
+ for (var file in req.files) {
+  // skip loop if the property is from prototype
+  if (!req.files.hasOwnProperty(file)) continue;
+i++;
+  var obj =  await file;
+  
+
+       tmpPath = req.files[obj].tempFilePath;
+      
+       model = req.body.model
+       dir = "./images/"+model
+       newPath = "./images/"+model+"/"+model+i + ".png";
+
+       moveFile(tmpPath, newPath);
+     updateExtraction(newPath, model, i)
+  
+ 
+      
+ }
+
+
+   
+
+
+    
+
+
+
+     res.send("ok")
+ 
+
+})
+
+
+*/
 app.post("/r", jsonParser, function (req, res) {
     //
     updateResults(req.body.img);
-    res.json({ status: person.name });
+    res.json({ status: frontEnd });
 });
-app.get("/models", function (req, res) {
-    res.send({ classes: classes });
-    run2();
-});
-app.get("/n", function (req, res) {
-    var silence = new Now({ time: new Date() });
-    silence.save(function (err, silence) {
-        if (err)
-            return console.error(err);
-        console.log(silence.time); // 'Silence'
-    });
-    res.send("100 ko");
-});
-app.post("/extract", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var tmpPath, model, dir, newPath, i, _a, _b, _i, file, obj;
-    return __generator(this, function (_c) {
-        switch (_c.label) {
-            case 0:
-                i = 0;
-                _a = [];
-                for (_b in req.files)
-                    _a.push(_b);
-                _i = 0;
-                _c.label = 1;
-            case 1:
-                if (!(_i < _a.length)) return [3 /*break*/, 4];
-                file = _a[_i];
-                // skip loop if the property is from prototype
-                if (!req.files.hasOwnProperty(file))
-                    return [3 /*break*/, 3];
-                i++;
-                return [4 /*yield*/, file];
-            case 2:
-                obj = _c.sent();
-                tmpPath = req.files[obj].tempFilePath;
-                model = req.body.model;
-                dir = "./images/" + model;
-                newPath = "./images/" + model + "/" + model + i + ".png";
-                moveFile(tmpPath, newPath);
-                updateExtraction(newPath, model, i);
-                _c.label = 3;
-            case 3:
-                _i++;
-                return [3 /*break*/, 1];
-            case 4:
-                res.send("ok");
-                return [2 /*return*/];
-        }
-    });
-}); });
 run2();
 function getFaceImageUri(className, idx) {
     return "./images/" + className + "/" + className + idx + ".png";
@@ -232,10 +257,12 @@ function drawFaceRecognitionResults(results, img) {
                 case 0: return [4 /*yield*/, commons_1.canvas.loadImage(img)];
                 case 1:
                     inputImgEl = _a.sent();
+                    frontEnd.result = [];
                     results.forEach(function (element) {
                         console.log("gender :", element.gender);
                         console.log("age :", element.age);
                         console.log("express :", element.expressions);
+                        frontEnd.result.push({ age: element.age, gender: element.gender, express: element.expressions });
                     });
                     return [4 /*yield*/, faceapi.resizeResults(results, inputImgEl)];
                 case 2:

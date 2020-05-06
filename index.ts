@@ -60,13 +60,15 @@ app.get("/", (req, res) => {
  // updateExtraction(QUERY_IMAGE, "null", 0)
 res.render("index");
 })
-
+var person = { time: Date.now(), name: {} }
+var frontEnd = {result:[]}
+/*
 
 app.get("/see", (req, res) => {
 res.render("process");
 })
 
-var person = { time: Date.now(), name: {} }
+
 
 app.get("/s", (req, res) => {
 
@@ -78,11 +80,7 @@ app.get("/s", (req, res) => {
 })
 
 
-app.post("/r", jsonParser, (req, res) => {
-//
-  updateResults(req.body.img)
-  res.json({ status: person.name })
-})
+
 
 app.get("/models", (req,res)=>{
   res.send({classes})
@@ -144,6 +142,15 @@ i++;
 
 })
 
+
+*/
+
+app.post("/r", jsonParser, (req, res) => {
+  //
+    updateResults(req.body.img)
+    res.json({ status: frontEnd })
+  })
+
 run2()
 
 
@@ -197,13 +204,14 @@ async function drawFaceRecognitionResults(results, img) {
   // const canvas = $('#showlbl').get(0)
   // const inputImgEl = $('#inputImg').get(0)
   const inputImgEl = await canvas.loadImage(img)
+  frontEnd.result = []
   results.forEach(element => {
    console.log("gender :", element.gender)
    console.log("age :", element.age)
    console.log("express :", element.expressions)
-
-
+    frontEnd.result.push({age:element.age, gender: element.gender, express: element.expressions})
   });
+
   //faceapi.matchDimensions(canvas, inputImgEl)
   // resize detection and landmarks in case displayed image is smaller than
   // original size
