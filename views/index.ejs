@@ -35,7 +35,7 @@
           <a class="nav-link" href="#service">Service</a>
         </li>
         <li class="nav-item active">
-          <a class="nav-link" href="#">Pricing</a>
+          <a class="nav-link" href="#demo">Demo</a>
         </li>
         <li class="nav-item active">
           <a class="nav-link" href="#">Contact</a>
@@ -121,14 +121,27 @@
 </div>
 
 <div id="demo" class="section jarallax" data-section-name="demo">
-   <div class="des"></div>
+  <div class="info">
+    <h2 class="demo-title">Think you are a shop manager. The following data is comming from the shop camera.</h2>
+  <div class="right">
+    <h3>Advise for the Customer</h3>
+    <div class="des"></div>
+  </div>
+   <div class="left">
+      <h3>Advise for the Shop Manager</h3>
+     <div class="des2"></div>
+    </div>
+  </div>
     <div class="fullbg"></div>
     <video class="jarallax-img" onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
     <canvas id="flsvid" width="2560" height="1440" style="display: none;"></canvas>
     <canvas id="overlay"></canvas>
   
   </div>
-  
+  <audio id="cst">
+    <source id="cstsrc" src="" type="audio/mpeg">
+  Your browser does not support the audio element.
+  </audio>
 
 
 <script>
@@ -167,7 +180,6 @@ const services = [1, 2, 3,4,5,6,7]
     var service = services[Math.floor(Math.random() * services.length)];
     var vidId = document.getElementById("video"+service)
     $("#sersec"+service).show()
-    console.log(txt[service])
     typeit(document.getElementById("vid"+service),txt[service])
     vidId.load();
     vidId.play();
@@ -211,7 +223,25 @@ var errorCallback = function(error) {
   }
 
 run()
-
+ri = 0
+function callcst(gen){
+  if(gen=="male"){
+    document.getElementById("cstsrc").src = "/aud/man.mp3";
+                  cst.load()
+                  cst.play()
+                  setTimeout(() => {
+                    ri=0
+                  }, 60000);
+  }else{
+    document.getElementById("cstsrc").src = "/aud/woman.mp3";
+                  cst.load()
+                  cst.play()
+                  setTimeout(() => {
+                    ri=0
+                  }, 60000);
+  }
+  
+}
 setInterval(() => {
       const canv = document.getElementById("flsvid")
       const ctx = canv.getContext("2d")
@@ -226,12 +256,78 @@ setInterval(() => {
       })
       .then(function (response) {
         $("#demo .des").html("")
+        $("#demo .des2").html("")
           response.data.status.result.forEach(v=>{
-            $("#demo .des").prepend(
+              var path = window.location.href;
+              if(path.split("#").pop()=="demo"){
+                if(v.gender=="male"){
+                ri==0?callcst("male"):null
+                 ri = 1;
+                }else{
+                  ri==0?callcst("female"):null
+                 ri = 1;
+                }
+              }
+              if(v.gender=="female"){
+                $("#demo .des").prepend(
             `
-            <h5>${Math.floor(v.age+5)} and ${v.gender} and Happy ${Math.floor((v.express.happy*100))}%</h5>
+            <h5 style="color:yellow;">
+            Please go to the second floor to reach the women corner.</h5>
             `
           )
+              }
+            
+              if(v.gender=="male"){
+                $("#demo .des").prepend(
+            `
+            <h5 style="color:blue;">
+            Please go to the third floor to reach the men corner.</h5>
+            `
+          )
+              }
+
+              let agee = Math.floor(v.age)
+              $("#demo .des2").prepend(
+                
+                `<h4 style="color:black;">Age of the Customer is aprox. ${agee-5} to ${agee+5}</h4>`
+              )
+              if(v.sad*100>1){
+                $("#demo .des2").prepend(
+                  `
+                  <h5 style="color:red;">
+                  The customer is being sad. Please say something to be happy.
+                  </h5>
+                  `
+                )
+              }
+
+              if(v.angry*100>1){
+                $("#demo .des2").prepend(
+                  `
+                  <h5 style="color:red;">
+                  The customer is being angry. Please say something to be happy.
+                  </h5>
+                  `
+                )
+              }
+
+              if(v.happy*100>50){
+                $("#demo .des2").prepend(
+                  `
+                  <h5 style="color:green;">
+                  The customer is being happy. Please keep it.
+                  </h5>
+                  `
+                )
+              }else{
+                $("#demo .des2").prepend(
+                  `
+                  <h5 style="color:chocolate;">
+                  Please try to make the customer happy.
+                  </h5>
+                  `)
+              }
+          
           })
         })
       .catch(function (error) {
@@ -304,13 +400,27 @@ setInterval(() => {
     padding: 25px;
     text-align: center;
 }
-
-#demo .des{
-  position: absolute;
-  z-index: 9999999;
-    top: 10%;
+#demo .right{
+  display: inline-block;
+  width: 40%;
+  float: right;
+}
+#demo .left{
+  display: inline-block;
+  width: 40%;
+  float: left;
 }
 
+.info{
+  display: inline-block;
+    width: 100%;
+    height: auto;
+    position: absolute;
+    background-color: rgba(255,255,255,.7);
+    padding: 15px;
+    text-align: center;
+    top: 60px;
+}
 @media only screen and (max-width: 960px) {
   .vidsec h1{
     top: 80%;
@@ -354,7 +464,15 @@ setInterval(() => {
     display: inline-block;
 }
 
-
+.demo-title{
+  text-align: center;
+    color: green;
+    font-size: 20px;
+    background-color: #000
+}
+.right h3, .left h3{
+  font-size: 15px;
+}
 </style>
 
 <body>

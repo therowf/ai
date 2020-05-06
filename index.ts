@@ -209,7 +209,12 @@ async function drawFaceRecognitionResults(results, img) {
    console.log("gender :", element.gender)
    console.log("age :", element.age)
    console.log("express :", element.expressions)
-    frontEnd.result.push({age:element.age, gender: element.gender, express: element.expressions})
+    frontEnd.result.push({
+      age:element.age, 
+      gender: element.gender,
+      sad: element.expressions.sad,
+    angry:element.expressions.angry,
+  happy:element.expressions.happy})
   });
 
   //faceapi.matchDimensions(canvas, inputImgEl)
