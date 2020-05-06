@@ -15,7 +15,11 @@
 <script src="/js/scroll.js"></script>
 <script src="/js/type.js"></script>
 </head>
-
+<div id="camera" hidden>
+    <a href="#" class="arrow up"></a>
+    <h2>Please allow your camera to see demo!!!</h2>
+    <button id="arrowbtn" class="btn btn-dark">OK</button>
+</div>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-fixed-top">
     <a class="navbar-brand" href="#">Eagle Eye</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,7 +52,7 @@
   <div class="des">
     <h1 id="home-txt"></h1>
   </div>
-        <video class="jarallax-img" preload="auto" autoplay loop muted>
+        <video class="jarallax-img" preload="auto" poster="/vid/home.png" autoplay loop muted>
             <source src="/vid/home.mp4" type="video/mp4">
             Your browser does not support the video tag.
           </video>
@@ -59,7 +63,7 @@
   <div id="sersec1" class="jarallax vidsec" style="display: none">
     <h1 id="vid1">...</h1>
     <div class="fullbg"></div>
-    <video id="video1" class="jarallax-img" preload="auto" autoplay muted>
+    <video id="video1" class="jarallax-img" preload="auto" poster="/vid/service1.png" autoplay muted>
       <source src="/vid/service1.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
@@ -68,7 +72,7 @@
   <div id="sersec2" class="jarallax vidsec" style="display: none">
     <h1 id="vid2">...</h1>
     <div class="fullbg"></div>
-    <video id="video2" class="jarallax-img" preload="auto" autoplay muted>
+    <video id="video2" class="jarallax-img" preload="auto" poster="/vid/service2.png" autoplay muted>
       <source src="/vid/service2.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
@@ -76,7 +80,7 @@
   <div id="sersec3" class="jarallax vidsec" style="display: none">
     <h1 id="vid3">...</h1>
     <div class="fullbg"></div>
-    <video id="video3" class="jarallax-img" preload="auto" autoplay muted>
+    <video id="video3" class="jarallax-img" preload="auto" poster="/vid/service3.png" autoplay muted>
       <source src="/vid/service3.mp4" type="video/mp4">
       Your browser does not support the video tag.
     </video>
@@ -84,7 +88,7 @@
   <div id="sersec4" class="jarallax vidsec" style="display: none">
       <h1 id="vid4">...</h1>
       <div class="fullbg"></div>
-      <video id="video4" class="jarallax-img" preload="auto" autoplay muted>
+      <video id="video4" class="jarallax-img" preload="auto" poster="/vid/service4.png" autoplay muted>
         <source src="/vid/service4.mp4" type="video/mp4">
         Your browser does not support the video tag.
       </video>
@@ -92,7 +96,7 @@
     <div id="sersec5" class="jarallax vidsec" style="display: none">
         <h1 id="vid5">...</h1>
         <div class="fullbg"></div>
-        <video id="video5" class="jarallax-img" preload="auto" autoplay muted>
+        <video id="video5" class="jarallax-img" preload="auto" poster="/vid/service5.png" autoplay muted>
           <source src="/vid/service5.mp4" type="video/mp4">
           Your browser does not support the video tag.
         </video>
@@ -100,7 +104,7 @@
       <div id="sersec6" class="jarallax vidsec" style="display: none">
           <h1 id="vid6">...</h1>
           <div class="fullbg"></div>
-          <video id="video6" class="jarallax-img" preload="auto" autoplay muted>
+          <video id="video6" class="jarallax-img" preload="auto" poster="/vid/service6.png" autoplay muted>
             <source src="/vid/service6.mp4" type="video/mp4">
             Your browser does not support the video tag.
           </video>
@@ -108,7 +112,7 @@
         <div id="sersec7" class="jarallax vidsec" style="display: none">
             <h1 id="vid7">...</h1>
             <div class="fullbg"></div>
-            <video id="video7" class="jarallax-img" preload="auto" autoplay muted>
+            <video id="video7" class="jarallax-img" preload="auto" poster="/vid/service7.png" autoplay muted>
               <source src="/vid/service7.mp4" type="video/mp4">
               Your browser does not support the video tag.
             </video>
@@ -157,22 +161,50 @@ const services = [1, 2, 3,4,5,6,7]
     $("#sersec"+service).show()
     console.log(txt[service])
     typeit(document.getElementById("vid"+service),txt[service])
-    vidId.play()
+    vidId.load();
+    vidId.play();
     vidId.onended = ()=>{
       $("#sersec"+service).hide()
       startit()
     }
+
     }
 
     startit()
     
+    var successCallback = function(error) {
+  // user allowed access to camera
+};
+var errorCallback = function(error) {
+  if (error.name == 'NotAllowedError') {
+   $("#camera").removeAttr("hidden")
+  }
+};
+navigator.mediaDevices.getUserMedia({video:true})
+  .then(successCallback, errorCallback);
 
+})
+
+$("#arrowbtn").click(function(){
+  $("#camera").hide()
 })
 </script>
 
 <script src="/js/pages.js"></script>
 
 <style>
+  #camera{
+    display: inline-block;
+    width: 200px;
+    height: auto;
+    background-color: rgba(0,0,0,.8);
+    position: absolute;
+    z-index: 9999999999;
+    text-align: center;
+    border-radius: 10px;
+    padding: 5px;
+    color:#fff;
+  }
 .navbar{
   position: fixed;
     top: 0;
@@ -220,6 +252,41 @@ const services = [1, 2, 3,4,5,6,7]
   }
 
 }
+
+
+
+
+
+
+
+
+
+@-webkit-keyframes uparrow {
+  0% { -webkit-transform: translateY(0); opacity: 0.4 }
+  100% { -webkit-transform: translateY(-3em); opacity: 1 }
+}
+
+
+.arrow {
+  border-color:transparent;
+  border-style:solid;
+  border-width:0 2em;
+  display:block;
+  height:0;
+  opacity:0.4;
+  text-indent:-9999px;
+  transform-origin: 50% 50%;
+  width:0;
+}
+.up {
+  -webkit-animation: uparrow 0.6s infinite alternate ease-in-out;
+  border-bottom:2em solid #fff;
+  margin-top: 50px;
+  margin-left: 100px;
+    display: inline-block;
+}
+
+
 </style>
 
 <body>
