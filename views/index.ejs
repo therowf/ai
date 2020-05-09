@@ -248,10 +248,11 @@ setInterval(() => {
 
       ctx.drawImage($('#inputVideo').get(0), 0, 0, canv.width, canv.height);
       let frmData = new FormData();
-
+      let root = location.protocol+"//"+ window.location.host+"/r"
        img = canv.toDataURL("image/jpeg")
       frmData.append("img", img)
-      axios.post('/r', {
+      console.log(root)
+      axios.post(root, {
         img: canv.toDataURL("image/jpeg")
       })
       .then(function (response) {

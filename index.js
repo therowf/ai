@@ -50,7 +50,7 @@ var whitelist = ['http://localhost:5000', 'http://localhost:' + process.env.PORT
 var corsOptions = {
     origin: function (origin, callback) {
         console.log(origin);
-        if (whitelist.indexOf(origin) !== -1 || !origin) {
+        if (whitelist.indexOf(origin) !== -1) {
             callback(null, true);
         }
         else {
@@ -89,6 +89,7 @@ app.use(fileUpload({
 app.use(express.static(path.join(__dirname, './public')));
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
 var jsonParser = bodyParser.json({ limit: "50mb" });
+// app.use(cors(corsOptions))
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
@@ -100,7 +101,7 @@ var logSchema = new mongoose.Schema({
 });
 var Now = mongoose.model('logSchema', logSchema);
 var net;
-app.get("/", cors(corsOptions), function (req, res) {
+app.get("/", function (req, res) {
     run2();
     updateResults(QUERY_IMAGE);
     // updateExtraction(QUERY_IMAGE, "null", 0)

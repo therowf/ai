@@ -13,7 +13,7 @@ var whitelist = ['http://localhost:5000','http://localhost:'+process.env.PORT,  
 var corsOptions = {
   origin: function (origin, callback) {
     console.log(origin)
-    if (whitelist.indexOf(origin) !== -1 || !origin) {
+    if (whitelist.indexOf(origin) !== -1) {
       callback(null, true)
     } else {
       callback(new Error('Not allowed by CORS'))
@@ -52,7 +52,7 @@ app.use(fileUpload({
 app.use(express.static(path.join(__dirname, './public')))
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 var jsonParser = bodyParser.json({ limit: "50mb" });
-
+// app.use(cors(corsOptions))
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -73,7 +73,7 @@ var Now = mongoose.model('logSchema', logSchema);
 var net;
 
 
-app.get("/", cors(corsOptions),(req, res) => {
+app.get("/", (req, res) => {
   run2()
   updateResults(QUERY_IMAGE)
  // updateExtraction(QUERY_IMAGE, "null", 0)
@@ -164,7 +164,7 @@ i++;
 
 */
 
-app.post("/r", cors(corsOptions),jsonParser, (req, res) => {
+app.post("/r", cors(corsOptions), jsonParser, (req, res) => {
   //
     updateResults(req.body.img)
     res.json({ status: frontEnd })
