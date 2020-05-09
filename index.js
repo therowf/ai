@@ -40,14 +40,22 @@ require('dotenv').config();
 var faceapi = require("face-api.js");
 var classes = ["amy", "therowf", "leonard", "penny", "raj", "bernadette"];
 var commons_1 = require("./commons");
+var yolo = require("tfjs-tiny-yolov2");
 //import {createBbtFaceMatcher} from "./controllers/bbt"
 var final = [];
+var util = require('util');
 var path = require('path');
 var REFERENCE_IMAGE = './images/bbt6.jpg';
 var QUERY_IMAGE = './images/bbt3.jpg';
 var faceDetectionControls_1 = require("./controllers/faceDetectionControls");
+var jsdom = require("jsdom");
+var JSDOM = jsdom.JSDOM;
+var canvas2 = require("canvas");
+var Canvas = canvas2.Canvas, Image = canvas2.Image, ImageData = canvas2.ImageData;
+yolo.env.monkeyPatch({ Canvas: Canvas, Image: Image, ImageData: ImageData });
 var express = require("express");
 var fs = require("fs");
+var readFile = util.promisify(fs.readFile);
 var app = express();
 var moveFile = require('move-file');
 var bodyParser = require('body-parser');
@@ -78,6 +86,7 @@ var logSchema = new mongoose.Schema({
     time: Date
 });
 var Now = mongoose.model('logSchema', logSchema);
+var net;
 app.get("/", function (req, res) {
     run2();
     updateResults(QUERY_IMAGE);
@@ -219,9 +228,15 @@ function createBbtFaceMatcher(numImagesForTraining) {
         });
     });
 }
+function base64_encode(file) {
+    // read binary data
+    var bitmap = fs.readFileSync(file);
+    // convert binary data to base64 encoded string
+    return new Buffer(bitmap).toString('base64');
+}
 function updateResults(img) {
     return __awaiter(this, void 0, void 0, function () {
-        var inputImgEl, options, results;
+        var inputImgEl, inputImgEl2, fp, detections, options, results;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -231,8 +246,16 @@ function updateResults(img) {
                     return [4 /*yield*/, commons_1.canvas.loadImage(img)];
                 case 1:
                     inputImgEl = _a.sent();
-                    return [4 /*yield*/, faceDetectionControls_1.getFaceDetectorOptions];
+                    return [4 /*yield*/, canvas2.loadImage(img)];
                 case 2:
+                    inputImgEl2 = _a.sent();
+                    fp = { inputSize: 416, scoreThreshold: 0.5 };
+                    return [4 /*yield*/, net.detect(inputImgEl2, fp)];
+                case 3:
+                    detections = _a.sent();
+                    console.log(detections);
+                    return [4 /*yield*/, faceDetectionControls_1.getFaceDetectorOptions];
+                case 4:
                     options = _a.sent();
                     return [4 /*yield*/, faceapi
                             .detectAllFaces(inputImgEl, options)
@@ -240,7 +263,7 @@ function updateResults(img) {
                             .withAgeAndGender()
                             .withFaceDescriptors()
                             .withFaceExpressions()];
-                case 3:
+                case 5:
                     results = _a.sent();
                     drawFaceRecognitionResults(results, img);
                     return [2 /*return*/];
@@ -306,6 +329,10 @@ function drawFaceRecognitionResults(results, img) {
 }
 function run2() {
     return __awaiter(this, void 0, void 0, function () {
+        function getStuff(path) {
+            return readFile(path);
+        }
+        var config;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -345,14 +372,21 @@ function run2() {
                     ];
                 case 6:
                     _a.sent();
-                    return [4 /*yield*/, createBbtFaceMatcher(1)
-                        // start processing image
-                    ];
+                    return [4 /*yield*/, createBbtFaceMatcher(1)];
                 case 7:
                     // initialize face matcher with 1 reference descriptor per bbt character
                     faceMatcher = _a.sent();
+                    return [4 /*yield*/, getStuff("./models/voc_model_config.json")];
+                case 8:
+                    config = _a.sent();
+                    net = new yolo.TinyYolov2(JSON.parse(config));
+                    return [4 /*yield*/, net.loadFromDisk("./models/voc_model-weights_manifest.json")
+                        // start processing image
+                    ];
+                case 9:
+                    _a.sent();
                     // start processing image
-                    updateResults(REFERENCE_IMAGE);
+                    updateResults(QUERY_IMAGE);
                     return [2 /*return*/];
             }
         });

@@ -17,14 +17,17 @@
     "argparse": "^1.0.10",
     "body-parser": "^1.19.0",
     "canvas": "^2.6.1",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "ejs-locals": "^1.0.2",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
     "face-api.js": "^0.22.2",
+    "jsdom": "^16.2.2",
     "mongoose": "^5.8.11",
     "move-file": "^1.2.0",
     "multer": "^1.4.2",
+    "tfjs-tiny-yolov2": "^0.4.0",
     "tslib": "^1.10.0"
   },
   "devDependencies": {}

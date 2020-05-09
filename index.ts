@@ -3,16 +3,23 @@ import * as faceapi from 'face-api.js';
 let classes = ["amy", "therowf", "leonard", "penny", "raj", "bernadette"]
 import { canvas, faceDetectionNet, faceDetectionOptions, saveFile } from './commons';
 import { func } from '@tensorflow/tfjs-data';
+import * as yolo from 'tfjs-tiny-yolov2';
 //import {createBbtFaceMatcher} from "./controllers/bbt"
 let final = [];
+const util = require('util');
 const path = require('path')
+var cors = require('cors')
 const REFERENCE_IMAGE = './images/bbt6.jpg';
 const QUERY_IMAGE = './images/bbt3.jpg';
 import { getFaceDetectorOptions, isFaceDetectionModelLoaded, getCurrentFaceDetectionNet } from "./controllers/faceDetectionControls";
-import { Dirent } from 'fs';
-import { op } from '@tensorflow/tfjs';
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+const canvas2 = require("canvas");
+const { Canvas, Image, ImageData } = canvas2
+yolo.env.monkeyPatch({ Canvas, Image, ImageData })
 const express = require("express");
 const fs = require("fs")
+const readFile = util.promisify(fs.readFile);
 const app = express();
 const moveFile = require('move-file');
 var bodyParser = require('body-parser')
@@ -52,6 +59,7 @@ var logSchema = new mongoose.Schema({
 
 var Now = mongoose.model('logSchema', logSchema);
 
+var net;
 
 
 app.get("/", (req, res) => {
@@ -181,13 +189,28 @@ async function createBbtFaceMatcher(numImagesForTraining = 5) {
 
   return new faceapi.FaceMatcher(labeledFaceDescriptors)
 }
-
+function base64_encode(file) {
+  // read binary data
+  var bitmap = fs.readFileSync(file);
+  // convert binary data to base64 encoded string
+  return new Buffer(bitmap).toString('base64');
+}
 async function updateResults(img) {
   if (!isFaceDetectionModelLoaded) {
     console.log("-------")
   }
 
   const inputImgEl = await canvas.loadImage(img)
+  const inputImgEl2 = await canvas2.loadImage(img)
+
+  let fp = {inputSize: 416, scoreThreshold: 0.5}
+
+
+  const detections = await net.detect(inputImgEl2, fp)
+  console.log(detections)
+  //yolo.drawDetection('overlay', detections.map(det => det.forSize(width, height), { color: 'red' }))
+
+
 
   const options = await getFaceDetectorOptions
   const results = await faceapi
@@ -268,8 +291,15 @@ async function run2() {
   // initialize face matcher with 1 reference descriptor per bbt character
   faceMatcher = await createBbtFaceMatcher(1)
 
+
+  function getStuff(path) {
+    return readFile(path);
+  }
+  const config = await getStuff("./models/voc_model_config.json")
+  net = new yolo.TinyYolov2(JSON.parse(config))
+  await net.loadFromDisk(`./models/voc_model-weights_manifest.json`)
   // start processing image
-  updateResults(REFERENCE_IMAGE)
+  updateResults(QUERY_IMAGE)
 
  // updateExtraction(REFERENCE_IMAGE, "null", 0)
 }
