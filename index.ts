@@ -2,7 +2,7 @@ require('dotenv').config()
 import * as faceapi from 'face-api.js';
 let classes = ["amy", "therowf", "leonard", "penny", "raj", "bernadette"]
 import { canvas, faceDetectionNet, faceDetectionOptions, saveFile } from './commons';
-import { func } from '@tensorflow/tfjs-data';
+
 import * as yolo from 'tfjs-tiny-yolov2';
 //import {createBbtFaceMatcher} from "./controllers/bbt"
 let final = [];
@@ -62,7 +62,7 @@ var Now = mongoose.model('logSchema', logSchema);
 var net;
 
 
-app.get("/", (req, res) => {
+app.get("/", cors(),(req, res) => {
   run2()
   updateResults(QUERY_IMAGE)
  // updateExtraction(QUERY_IMAGE, "null", 0)
@@ -153,7 +153,7 @@ i++;
 
 */
 
-app.post("/r", jsonParser, (req, res) => {
+app.post("/r", cors(),jsonParser, (req, res) => {
   //
     updateResults(req.body.img)
     res.json({ status: frontEnd })

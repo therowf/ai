@@ -45,6 +45,7 @@ var yolo = require("tfjs-tiny-yolov2");
 var final = [];
 var util = require('util');
 var path = require('path');
+var cors = require('cors');
 var REFERENCE_IMAGE = './images/bbt6.jpg';
 var QUERY_IMAGE = './images/bbt3.jpg';
 var faceDetectionControls_1 = require("./controllers/faceDetectionControls");
@@ -87,7 +88,7 @@ var logSchema = new mongoose.Schema({
 });
 var Now = mongoose.model('logSchema', logSchema);
 var net;
-app.get("/", function (req, res) {
+app.get("/", cors(), function (req, res) {
     run2();
     updateResults(QUERY_IMAGE);
     // updateExtraction(QUERY_IMAGE, "null", 0)
@@ -177,7 +178,7 @@ i++;
 
 
 */
-app.post("/r", jsonParser, function (req, res) {
+app.post("/r", cors(), jsonParser, function (req, res) {
     //
     updateResults(req.body.img);
     res.json({ status: frontEnd });
