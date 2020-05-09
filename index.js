@@ -49,7 +49,8 @@ var cors = require('cors');
 var whitelist = ['http://localhost:5000', 'http://localhost:' + process.env.PORT, 'http://runapro.com'];
 var corsOptions = {
     origin: function (origin, callback) {
-        if (whitelist.indexOf(origin) !== -1) {
+        console.log(origin);
+        if (whitelist.indexOf(origin) !== -1 || !origin) {
             callback(null, true);
         }
         else {
