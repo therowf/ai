@@ -9,7 +9,7 @@ let final = [];
 const util = require('util');
 const path = require('path')
 var cors = require('cors');
-var whitelist = ['http://localhost:5000', 'https://runapro.com']
+var whitelist = ['http://localhost:5000','http://localhost:'+process.env.PORT,  'http://runapro.com']
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
