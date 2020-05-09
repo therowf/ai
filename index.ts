@@ -8,7 +8,17 @@ import * as yolo from 'tfjs-tiny-yolov2';
 let final = [];
 const util = require('util');
 const path = require('path')
-var cors = require('cors')
+var cors = require('cors');
+var whitelist = ['http://localhost:5000', 'https://runapro.com']
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
 const REFERENCE_IMAGE = './images/bbt6.jpg';
 const QUERY_IMAGE = './images/bbt3.jpg';
 import { getFaceDetectorOptions, isFaceDetectionModelLoaded, getCurrentFaceDetectionNet } from "./controllers/faceDetectionControls";
@@ -62,7 +72,7 @@ var Now = mongoose.model('logSchema', logSchema);
 var net;
 
 
-app.get("/", cors(),(req, res) => {
+app.get("/", cors(corsOptions),(req, res) => {
   run2()
   updateResults(QUERY_IMAGE)
  // updateExtraction(QUERY_IMAGE, "null", 0)
@@ -153,7 +163,7 @@ i++;
 
 */
 
-app.post("/r", cors(),jsonParser, (req, res) => {
+app.post("/r", cors(corsOptions),jsonParser, (req, res) => {
   //
     updateResults(req.body.img)
     res.json({ status: frontEnd })
